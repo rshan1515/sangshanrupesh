@@ -1,5 +1,1 @@
-{
-  "image": "mcr.microsoft.com/devcontainers/universal:2",
-  "features": {
-  }
-}
+{"name": "Profile Config Codespace", "image": "mcr.microsoft.com/devcontainers/base:ubuntu", "features": {}, "customizations": {"vscode": {"settings": {}, "extensions": ["github.copilot", "streetsidesoftware.code-spell-checker"]}}, "forwardPorts": [], "postCreateCommand": "echo 'Codespace setup complete!'"}
