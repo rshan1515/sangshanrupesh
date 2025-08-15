@@ -34,3 +34,7 @@ jobs:
         run: |
           echo Add other actions to build,
           echo test, and deploy your project.
+
+      # Add a step to run the debug.js script
+      - name: Run debug.js script
+        run: node debug.js
