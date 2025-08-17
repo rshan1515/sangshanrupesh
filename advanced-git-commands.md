@@ -1,154 +1,208 @@
-# Advanced Git Commands: Usage, Examples, and Debugging Tips
+# Advanced Git Commands: Complete Usage, Debugging, and Best Practices
 
-Mastering advanced Git commands streamlines your workflow and boosts your ability to debug, recover, and manage code. Below are key commands, with clear explanations, usage examples, and debugging scenarios.
+## Table of Contents
+1. [Overview](#overview)
+2. [`git stash`](#git-stash)
+3. [`git cherry-pick`](#git-cherry-pick)
+4. [`git revert`](#git-revert)
+5. [`git reset`](#git-reset)
+6. [Quick Reference Table](#quick-reference-table)
+7. [Best Practices](#best-practices)
+8. [Troubleshooting & Recovery](#troubleshooting--recovery)
+9. [Sample Debugging Workflow](#sample-debugging-workflow)
+10. [Further Learning](#further-learning)
 
 ---
 
-## 1. `git stash`
+## Overview
+
+Advanced Git commands help you manage complex workflows, debug issues, and recover from mistakes efficiently. Below is a concise guide to their usage, with practical scenarios and troubleshooting advice.
+
+---
+
+## `git stash`
 
 **Purpose:**  
-Temporarily shelves (stashes) changes you’ve made to your working directory so you can work on something else, then come back and re-apply them.
+Temporarily saves (stashes) your local modifications so you can work elsewhere, then restores them when needed.
 
-**Usage:**
+**Common Usage:**
 ```sh
-# Stash all local changes (tracked files)
+# Stash tracked changes
 git stash
 
-# Stash, including untracked files
+# Stash tracked and untracked changes
 git stash -u
 
-# See all stashed changes
+# List all stashes
 git stash list
 
-# Apply the most recent stash and remove it from the stash list
+# Apply and remove the most recent stash
 git stash pop
 
-# Apply a stash but keep it in the stash list
-git stash apply stash@{0}
+# Apply a specific stash (keep it in the list)
+git stash apply stash@{1}
 
-# Delete a specific stash
-git stash drop stash@{0}
+# Remove a specific stash
+git stash drop stash@{1}
 ```
 
-**Debugging Scenario:**  
-Stash your in-progress work before switching branches to hotfix a bug, then return and restore your changes after debugging.
+**Practical Scenarios:**  
+- Switch branches to fix a critical bug, then return to your work.
+- Clean your working directory before running tests.
+
+**Tip:**  
+Stashes are stack-based (LIFO)—be sure to pop/apply the correct one!
 
 ---
 
-## 2. `git cherry-pick`
+## `git cherry-pick`
 
 **Purpose:**  
-Apply the changes from a specific commit onto your current branch. Useful for bringing bug fixes or features from one branch to another.
+Apply the changes from a specific commit (or range) onto your current branch.
 
-**Usage:**
+**Common Usage:**
 ```sh
-# Cherry-pick a commit by its hash
+# Apply a single commit
 git cherry-pick <commit-hash>
 
-# Cherry-pick a range of commits
+# Apply multiple commits
+git cherry-pick <commit1> <commit2>
+
+# Apply a range of commits
 git cherry-pick <start-commit-hash>^..<end-commit-hash>
 ```
 
-**Debugging Scenario:**  
-A bugfix exists on another branch. Cherry-pick the fix into your branch to test or release it without merging unrelated changes.
+**Practical Scenarios:**  
+- Bring a hotfix from one branch to another without merging unrelated changes.
+- Apply only relevant commits from a feature branch.
+
+**Tip:**  
+Resolve conflicts that may arise during cherry-pick carefully. Use `git cherry-pick --abort` to cancel if needed.
 
 ---
 
-## 3. `git revert`
+## `git revert`
 
 **Purpose:**  
-Undo a specific commit by creating a new commit. This is a safe way to undo changes, especially on shared branches.
+Create a new commit that undoes the changes of a previous commit, keeping history intact.
 
-**Usage:**
+**Common Usage:**
 ```sh
 # Revert a single commit
 git revert <commit-hash>
+
+# Revert multiple commits
+git revert <commit1> <commit2>
 
 # Revert a range of commits
 git revert <start-commit-hash>^..<end-commit-hash>
 ```
 
-**Debugging Scenario:**  
-A recent commit broke something. Revert it to restore a working state, keeping history intact and minimizing disruption for collaborators.
+**Practical Scenarios:**  
+- Undo a buggy commit after pushing to a shared branch.
+- Roll back only specific changes without affecting others.
+
+**Tip:**  
+Use revert for collaborative environments to avoid rewriting history.
 
 ---
 
-## 4. `git reset`
+## `git reset`
 
 **Purpose:**  
-Move the current branch pointer to a different commit and update the index and/or working directory, depending on the mode:
+Move the current branch pointer to a different commit, with optional changes to your working directory and staging area.
 
-- **--soft**: Keep changes staged.
-- **--mixed** (default): Keep changes in working directory, unstaged.
-- **--hard**: Discard all changes in working directory and index.
+**Modes:**
+- `--soft`: Keep changes staged (in index).
+- `--mixed` (default): Keep changes in working directory, unstaged.
+- `--hard`: Discard all changes in working directory and index.
 
-**Usage:**
+**Common Usage:**
 ```sh
-# Undo last commit, keep changes staged
+# Soft reset (undo commit, keep changes staged)
 git reset --soft HEAD~1
 
-# Undo last commit, keep changes in working directory
+# Mixed reset (undo commit, keep changes unstaged)
 git reset --mixed HEAD~1
 
-# Undo last commit, discard changes completely
+# Hard reset (undo commit, discard changes)
 git reset --hard HEAD~1
 
-# Reset to a specific commit by hash
+# Reset to a specific commit
 git reset --hard <commit-hash>
 ```
 
-**Debugging Scenario:**  
-You made several local commits that turned out to be wrong. Use reset to return to a clean slate and try again.
+**Practical Scenarios:**  
+- Clean up local history before pushing.
+- Remove unwanted commits and changes before sharing code.
 
 **Warning:**  
-`git reset --hard` will permanently discard changes—use with caution!
+`git reset --hard` deletes changes permanently!
 
 ---
 
 ## Quick Reference Table
 
-| Command         | What It Does                                  | Best For                              | Safety  |
-|-----------------|-----------------------------------------------|---------------------------------------|---------|
-| `git stash`     | Save/restore local changes temporarily        | Switching context, debug sessions     | Safe    |
-| `git cherry-pick`| Apply specific commit(s) to current branch   | Isolating bug fixes, selective merging| Safe    |
-| `git revert`    | Undo specific commit(s) with a new commit     | Undoing mistakes after push           | Very Safe|
-| `git reset`     | Move HEAD, optionally alter working directory | Undoing local history                 | Hard = Risky|
+| Command            | What It Does                               | Best For                                | Safety     |
+|--------------------|--------------------------------------------|-----------------------------------------|------------|
+| `git stash`        | Temporarily saves/restores changes         | Context switches, cleaning workspace    | Safe       |
+| `git cherry-pick`  | Applies specific commit(s) to branch       | Hotfixes, selective code transfer       | Safe       |
+| `git revert`       | Undoes commit(s) with new commit           | Undo after push, preserving history     | Very Safe  |
+| `git reset`        | Resets branch pointer, alters work area    | Local history rewrite, cleanups         | Hard = Risky|
 
 ---
 
 ## Best Practices
 
-- **Use `git stash` for quick context switches.**
-- **Use `git cherry-pick` for surgical code transfers.**
-- **Use `git revert` to safely undo commits on shared branches.**
-- **Use `git reset` for local history rewrites (before pushing).**
-- **Never use `git reset --hard` unless you're sure you don't need your changes.**
+- **Stash before switching branches to avoid losing work.**
+- **Cherry-pick only what's necessary to minimize merge conflicts.**
+- **Revert for collaborative undo—reset for local corrections.**
+- **Never use `reset --hard` unless you're absolutely sure.**
+- **Push regularly to remote for backup and traceability.**
 
 ---
 
-## Useful Debugging Workflow Example
+## Troubleshooting & Recovery
+
+- **Lost commit after reset?** Use `git reflog` to find and restore.
+- **Stuck stash?** Use `git stash list` and `git stash apply/drop` as needed.
+- **Merge/cherry-pick conflicts?** Resolve manually, then `git add` and `git cherry-pick --continue`.
+- **Accidental revert?** Revert the revert with another `git revert`.
+
+---
+
+## Sample Debugging Workflow
 
 ```sh
-# Save your current messy work
+# Stash unfinished work
 git stash
 
-# Checkout the branch where you need to debug
+# Switch to branch needing debug
 git checkout bugfix-branch
 
-# Apply a specific fix from another branch via cherry-pick
+# Apply a fix from another branch
 git cherry-pick <fix-commit-hash>
 
-# If something goes wrong, revert the cherry-pick
+# If cherry-pick fails, abort
+git cherry-pick --abort
+
+# If fix causes issues, revert it
 git revert HEAD
 
-# When ready, return to your original branch and restore your work
+# Restore original work
 git checkout my-feature-branch
 git stash pop
 
-# If you need a clean slate locally, perform a hard reset
+# If local history is messy, reset
 git reset --hard <good-commit-hash>
 ```
 
 ---
 
-For more Git tips, see [Pro Git Book](https://git-scm.com/book/en/v2) or [GitHub Docs](https://docs.github.com/en).
+## Further Learning
+
+- [Pro Git Book](https://git-scm.com/book/en/v2)
+- [GitHub Docs](https://docs.github.com/en)
+- [Git Cheat Sheet](https://education.github.com/git-cheat-sheet-education.pdf)
+
+---
