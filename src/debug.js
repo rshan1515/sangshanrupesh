@@ -33,13 +33,13 @@ function parseEnvLevels() {
     return new Set();
   }
   
-  // If DEBUG is 'true' or includes 'debug', enable all levels
-  if (debug === 'true' || debug.includes('debug')) {
-    return new Set(LEVELS);
-  }
-  
   // Parse comma-separated list of levels
   const parts = debug.split(',').map(s => s.trim().toLowerCase());
+  
+  // If DEBUG is 'true' or includes 'debug' as a token, enable all levels
+  if (debug === 'true' || parts.includes('debug')) {
+    return new Set(LEVELS);
+  }
   const levels = new Set();
   for (const part of parts) {
     if (LEVELS.includes(part)) {
