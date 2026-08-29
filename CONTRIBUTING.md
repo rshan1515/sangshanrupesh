@@ -14,6 +14,12 @@ Thank you for considering contributing!
 - Write clear commit messages.
 - Run tests before submitting PRs.
 
+## Run Tests
+
+```bash
+npm test
+```
+
 ## Reporting Issues
 
 - For bugs or feature requests, open an issue with details and reproduction steps.
