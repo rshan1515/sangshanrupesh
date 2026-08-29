@@ -1,0 +1,25 @@
+{
+  "name": "sangshanrupesh",
+  "version": "1.0.0",
+  "description": "GitHub profile configuration and documentation",
+  "main": "debug.js",
+  "scripts": {
+    "lint": "eslint . --ext .js,.jsx || true",
+    "test": "echo 'No tests configured yet'",
+    "precommit": "npm run lint"
+  },
+  "keywords": [
+    "github",
+    "profile",
+    "git",
+    "documentation"
+  ],
+  "author": "sangshanrupesh",
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^9.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
