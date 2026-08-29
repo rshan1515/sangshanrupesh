@@ -1,1 +1,9 @@
-.github/workflows/ci.yml @sangshanrupesh
+# Global code owner
+* @sangshanrupesh
+
+# Workflow-specific owners
+.github/workflows/ @sangshanrupesh
+
+# Security files
+.github/SECURITY.md @sangshanrupesh
+SECURITY.md @sangshanrupesh
