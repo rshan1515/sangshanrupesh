@@ -1,0 +1,80 @@
+name: ${COMPOSE_PROJECT_NAME:-scylla}
+
+x-scylla-common: &scylla-common
+  image: ${SCYLLA_IMAGE:-scylladb/scylla:latest}
+  restart: unless-stopped
+  networks:
+    - scylla
+
+services:
+  scylla-node-1:
+    <<: *scylla-common
+    container_name: scylla-node-1
+    command: ["--smp", "${SCYLLA_SMP:-1}", "--memory", "${SCYLLA_MEMORY:-750M}", "--overprovisioned", "1", "--api-address", "0.0.0.0"]
+    volumes:
+      - scylla-node-1-data:/var/lib/scylla
+    healthcheck:
+      test: ["CMD-SHELL", "nodetool status | grep -q '^UN'"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 90s
+
+  scylla-node-2:
+    <<: *scylla-common
+    container_name: scylla-node-2
+    command: ["--smp", "${SCYLLA_SMP:-1}", "--memory", "${SCYLLA_MEMORY:-750M}", "--overprovisioned", "1", "--api-address", "0.0.0.0", "--seeds", "scylla-node-1"]
+    depends_on:
+      scylla-node-1:
+        condition: service_healthy
+    volumes:
+      - scylla-node-2-data:/var/lib/scylla
+
+  scylla-node-3:
+    <<: *scylla-common
+    container_name: scylla-node-3
+    command: ["--smp", "${SCYLLA_SMP:-1}", "--memory", "${SCYLLA_MEMORY:-750M}", "--overprovisioned", "1", "--api-address", "0.0.0.0", "--seeds", "scylla-node-1"]
+    depends_on:
+      scylla-node-1:
+        condition: service_healthy
+    volumes:
+      - scylla-node-3-data:/var/lib/scylla
+
+  scylla-manager-db:
+    <<: *scylla-common
+    container_name: scylla-manager-db
+    command: ["--smp", "${SCYLLA_SMP:-1}", "--memory", "${SCYLLA_MEMORY:-750M}", "--overprovisioned", "1"]
+    volumes:
+      - scylla-manager-db-data:/var/lib/scylla
+    healthcheck:
+      test: ["CMD-SHELL", "nodetool status >/dev/null"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 90s
+
+  scylla-manager:
+    image: ${SCYLLA_MANAGER_IMAGE:-scylladb/scylla-manager:latest}
+    container_name: scylla-manager
+    restart: unless-stopped
+    depends_on:
+      scylla-manager-db:
+        condition: service_healthy
+    links:
+      - scylla-manager-db
+    networks:
+      - scylla
+
+networks:
+  scylla:
+    name: ${SCYLLA_NETWORK:-scylla-net}
+
+volumes:
+  scylla-node-1-data:
+    name: scylla-node-1-data
+  scylla-node-2-data:
+    name: scylla-node-2-data
+  scylla-node-3-data:
+    name: scylla-node-3-data
+  scylla-manager-db-data:
+    name: scylla-manager-db-data
